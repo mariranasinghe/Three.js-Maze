@@ -1,5 +1,8 @@
 let scene, camera, renderer, controls, clock
 
+const SPEED = 2;
+
+const MOUSE_SENSITIVITY = 0.001;
 const WALL_WIDTH = 5;
 const WALL_HEIGHT = 8;
 
@@ -21,10 +24,17 @@ function init() {
         renderer.domElement.requestPointerLock();
     });
 
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousemove', onMouseMove);
+    //window.addEventListener('resize', onWindowResize);
+
     // Add lighting to the scene
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     directionalLight.position.set(-100, 200, 100);
     scene.add(directionalLight);
+
+    const ambientLight = new THREE.AmbientLight(0xffcccc, 0.2);
+    scene.add(ambientLight);
 
     scene.add(createPlane());
     scene.add(createWall(-10, -50, 10, -50))
@@ -55,42 +65,48 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
 
-document.addEventListener('keydown', onKeyDown);
-document.addEventListener('mousemove', onMouseMove);
-
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
 function onMouseMove(event) {
     if (document.pointerLockElement == renderer.domElement) {
-        camera.rotateY(-event.movementX * 0.001);
-        // camera.rotateX(-event.movementY * 0.001);
+        camera.rotateY(-event.movementX * MOUSE_SENSITIVITY);
+        // camera.rotateX(-event.movementY * MOUSE_SENSITIVITY);
     }
 }
 
 function onKeyDown(event) {
     const keyCode = event.code;
 
-    const rot = Math.PI + camera.rotation.y;
+    // Get the direction that the camera is pointing in
+    const direction = new THREE.Vector3();
+    camera.getWorldDirection(direction);
+
+    // The rightward direction will be perpindicular to both the camera direction and the vertical direction
+    // Right hand rule: index finger = camera direction, thumb = vertical direction, perpindicular cross product = middle finger
+    const right = new THREE.Vector3();
+    right.crossVectors(new THREE.Vector3(0, 1, 0), direction);
+
     switch(keyCode) {
         case 'KeyW':
             // forwards
-            camera.position.z += Math.cos(rot);
-            camera.position.x += Math.sin(rot);
+            camera.position.add(direction.multiplyScalar(SPEED));
             break;
         case 'KeyS':
             // backwards
-            camera.position.z -= Math.cos(rot);
-            camera.position.x -= Math.sin(rot);
+            camera.position.sub(direction.multiplyScalar(SPEED));
             break;
         case 'KeyA':
             // left
-            camera.position.z += Math.cos(rot + Math.PI / 2);
-            camera.position.x += Math.sin(rot + Math.PI / 2);
+            camera.position.add(right.multiplyScalar(SPEED))
             break;
         case 'KeyD':
             // right
-            camera.position.z += Math.cos(rot - Math.PI / 2);
-            camera.position.x += Math.sin(rot - Math.PI / 2);
+            camera.position.sub(right.multiplyScalar(SPEED))
             break;
     }
 }
