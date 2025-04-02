@@ -1,0 +1,20 @@
+{
+  "name": "maze2",
+  "version": "1.0.0",
+  "description": "Three.js-Maze",
+  "main": "maze.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mariranasinghe/Three.js-Maze.git"
+  },
+  "author": "Marizza Ranasinghe",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mariranasinghe/Three.js-Maze/issues"
+  },
+  "homepage": "https://github.com/mariranasinghe/Three.js-Maze#readme"
+}
