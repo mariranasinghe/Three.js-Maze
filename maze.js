@@ -195,6 +195,7 @@ function createHedge() {
 
   hedgeMesh.instanceMatrix.needsUpdate = true;
 
+  // Fairy lights added to the hedge mesh
   const fairyLightGeometry = new THREE.SphereGeometry(0.2);
   const fairyLightMaterial = new THREE.MeshBasicMaterial({
     color: 0xffaa88,
