@@ -1,5 +1,3 @@
-const { color } = require("three/tsl");
-
 let scene, camera, renderer, controls, clock, skybox, skyboxTexture, maze;
 let minimapCamera, minimapRenderer, playerMarker;
 
@@ -72,10 +70,12 @@ function init() {
   //window.addEventListener('resize', onWindowResize);
 
   // Add lighting to the scene
-  const ambientLight = new THREE.AmbientLight(0xffcccc, 0.8);
+  const ambientLight = new THREE.AmbientLight(0xffcccc, 0.7);
   scene.add(ambientLight);
 
   scene.add(createPlane());
+
+  createGrass();
 
   // Create the maze
   maze = generateMaze(MAZE_SIZE, MAZE_SIZE);
@@ -195,7 +195,7 @@ function createHedge() {
 
   hedgeMesh.instanceMatrix.needsUpdate = true;
 
-  // Fairy lights added to the hedge mesh
+  // Point light added as fairy lights
   const fairyLightGeometry = new THREE.SphereGeometry(0.2);
   const fairyLightMaterial = new THREE.MeshBasicMaterial({
     color: 0xffaa88,
@@ -212,7 +212,7 @@ function createHedge() {
 
   for (let i = 0; i < maze.length; i++) {
     for (let j = 0; j < maze[i].length; j++) {
-      if (maze[i][j] === 1 && Math.random() < 0.1) {
+      if (maze[i][j] === 0 && Math.random() < 0.1) {
         const light = new THREE.PointLight(0xffdd99, 2, 5);
         light.position.set(i * WALL_WIDTH, WALL_HEIGHT * 0.8, j * WALL_WIDTH);
 
@@ -232,8 +232,16 @@ function createHedge() {
 
 function createPlane() {
   const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+  // Adding a texture to the terrain
+  const terrainTexture = new THREE.TextureLoader().load(
+    "https://media.githubusercontent.com/media/Entropite/Three.js-Maze/master/public/GrassTerrain.jpg"
+  );
+
+  terrainTexture.wrapS = THREE.RepeatWrapping;
+  terrainTexture.wrapT = THREE.RepeatWrapping;
+
   const planeMaterial = new THREE.MeshStandardMaterial({
-    color: 0x4a3a2d,
+    map: terrainTexture,
     side: THREE.FrontSide,
   });
   const plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -241,7 +249,50 @@ function createPlane() {
   return plane;
 }
 
-// Modified animate function to include minimap rendering
+// Adding grass
+function createGrass() {
+  const grassCount = 1000;
+  const grassGeometry = new THREE.PlaneGeometry(0.01, 0.5);
+
+  const grassTexture = new THREE.TextureLoader().load(
+    "https://media.githubusercontent.com/media/Entropite/Three.js-Maze/master/public/Bush_Texture.jpg"
+  );
+
+  // Make the texture repeat
+  grassTexture.wrapS = THREE.RepeatWrapping;
+  grassTexture.wrapT = THREE.RepeatWrapping;
+
+  const grassMaterial = new THREE.MeshStandardMaterial({
+    map: hedgeTexture,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.8,
+  });
+
+  const grassMesh = new THREE.InstancedMesh(
+    grassGeometry,
+    grassMaterial,
+    grassCount
+  );
+
+  const grassObject = new THREE.Object3D();
+
+  for (let i = 0; i < grassCount; i++) {
+    grassObject.position.set(
+      Math.random() * MAZE_SIZE * WALL_WIDTH * 2 - MAZE_SIZE * WALL_WIDTH,
+      0.1,
+      Math.random() * MAZE_SIZE * WALL_WIDTH * 2 - MAZE_SIZE * WALL_WIDTH
+    );
+
+    grassObject.rotation.y = Math.random() * Math.PI * 2;
+    grassObject.updateMatrix();
+    grassMesh.setMatrixAt(i, grassObject.matrix);
+  }
+
+  scene.add(grassMesh);
+}
+
+// Animate function to include minimap rendering
 function animate() {
   // Update player marker position for minimap
   updatePlayerMarker();
