@@ -236,9 +236,9 @@ function createPlane() {
   const terrainTexture = new THREE.TextureLoader().load(
     "https://media.githubusercontent.com/media/Entropite/Three.js-Maze/master/public/GrassTerrain.jpg"
   );
-
   terrainTexture.wrapS = THREE.RepeatWrapping;
   terrainTexture.wrapT = THREE.RepeatWrapping;
+  terrainTexture.repeat.set(2, 2);
 
   const planeMaterial = new THREE.MeshStandardMaterial({
     map: terrainTexture,
@@ -251,19 +251,11 @@ function createPlane() {
 
 // Adding grass
 function createGrass() {
-  const grassCount = 1000;
+  const grassCount = 9000000; // Number of grass blades
   const grassGeometry = new THREE.PlaneGeometry(0.01, 0.5);
 
-  const grassTexture = new THREE.TextureLoader().load(
-    "https://media.githubusercontent.com/media/Entropite/Three.js-Maze/master/public/Bush_Texture.jpg"
-  );
-
-  // Make the texture repeat
-  grassTexture.wrapS = THREE.RepeatWrapping;
-  grassTexture.wrapT = THREE.RepeatWrapping;
-
   const grassMaterial = new THREE.MeshStandardMaterial({
-    map: hedgeTexture,
+    color: 0x006400,
     side: THREE.DoubleSide,
     transparent: true,
     opacity: 0.8,
@@ -277,14 +269,17 @@ function createGrass() {
 
   const grassObject = new THREE.Object3D();
 
+  // Plane area which would have grass
+  const planeSize = 500;
+
   for (let i = 0; i < grassCount; i++) {
     grassObject.position.set(
-      Math.random() * MAZE_SIZE * WALL_WIDTH * 2 - MAZE_SIZE * WALL_WIDTH,
-      0.1,
-      Math.random() * MAZE_SIZE * WALL_WIDTH * 2 - MAZE_SIZE * WALL_WIDTH
+      Math.random() * planeSize * 2 - planeSize, // x-axis randomizarion
+      0.05, // y-axis randomizarion
+      Math.random() * planeSize * 2 - planeSize // z-axis randomizarion
     );
 
-    grassObject.rotation.y = Math.random() * Math.PI * 2;
+    grassObject.rotation.y = Math.random() * Math.PI * 2; // random rotated appearance
     grassObject.updateMatrix();
     grassMesh.setMatrixAt(i, grassObject.matrix);
   }
